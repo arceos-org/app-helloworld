@@ -50,6 +50,12 @@ A standalone Hello World application running on [ArceOS](https://github.com/arce
 ## Quick Start
 
 ```bash
+# install cargo-clone sub-command
+cargo install cargo-clone 
+# get source code of arceos-helloworld crate from crates.io
+cargo clone arceos-helloworld
+# into crate dir
+cd arceos-helloworld
 # Build and run on RISC-V 64 QEMU (default)
 cargo xtask run
 

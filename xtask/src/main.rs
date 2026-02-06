@@ -66,13 +66,9 @@ fn arch_info(arch: &str) -> ArchInfo {
     }
 }
 
-/// Locate the project root (parent of xtask/).
+/// Locate the project root.
 fn project_root() -> PathBuf {
-    let xtask_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    xtask_dir
-        .parent()
-        .expect("xtask must be inside the project directory")
-        .to_path_buf()
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
 /// Copy the architecture-specific axconfig to .axconfig.toml
