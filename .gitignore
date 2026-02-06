@@ -1,7 +1,5 @@
-/target
-/.vscode
-/.arceos
-/.cargo
+target
+.vscode
 .DS_Store
 Cargo.lock
 *.elf

@@ -11,7 +11,15 @@ fn main() {
     let profile_dir = std::fs::canonicalize(&profile_dir)
         .unwrap_or_else(|_| PathBuf::from(&out_dir).join("../../.."));
 
-    let platform = "riscv64-qemu-virt";
+    // Auto-detect the platform from the target architecture
+    let arch = std::env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    let platform = match arch.as_str() {
+        "riscv64" => "riscv64-qemu-virt",
+        "aarch64" => "aarch64-qemu-virt",
+        "x86_64" => "x86-pc",
+        "loongarch64" => "loongarch64-qemu-virt",
+        other => panic!("Unsupported architecture: {other}"),
+    };
     let lds_path = profile_dir.join(format!("linker_{platform}.lds"));
 
     println!("cargo:rustc-link-arg=-T{}", lds_path.display());

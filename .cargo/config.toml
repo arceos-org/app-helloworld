@@ -1,0 +1,5 @@
+[alias]
+xtask = "run --manifest-path xtask/Cargo.toml --"
+
+[env]
+AX_CONFIG_PATH = { value = ".axconfig.toml", relative = true }

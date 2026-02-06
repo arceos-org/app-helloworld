@@ -1,6 +1,15 @@
 # arceos-helloworld
 
-A standalone Hello World application running on [ArceOS](https://github.com/arceos-org/arceos) unikernel, with all dependencies sourced from [crates.io](https://crates.io). No local patches or monorepo required.
+A standalone Hello World application running on [ArceOS](https://github.com/arceos-org/arceos) unikernel, with all dependencies sourced from [crates.io](https://crates.io). Supports multiple architectures via `cargo xtask`.
+
+## Supported Architectures
+
+| Architecture | Rust Target | QEMU Machine | Platform |
+|---|---|---|---|
+| riscv64 | `riscv64gc-unknown-none-elf` | `qemu-system-riscv64 -machine virt` | riscv64-qemu-virt |
+| aarch64 | `aarch64-unknown-none-softfloat` | `qemu-system-aarch64 -machine virt` | aarch64-qemu-virt |
+| x86_64 | `x86_64-unknown-none` | `qemu-system-x86_64 -machine q35` | x86-pc |
+| loongarch64 | `loongarch64-unknown-none` | `qemu-system-loongarch64 -machine virt` | loongarch64-qemu-virt |
 
 ## Prerequisites
 
@@ -11,23 +20,27 @@ A standalone Hello World application running on [ArceOS](https://github.com/arce
   rustup default nightly
   ```
 
-- **RISC-V bare-metal target**
+- **Bare-metal targets** (install the ones you need)
 
   ```bash
   rustup target add riscv64gc-unknown-none-elf
+  rustup target add aarch64-unknown-none-softfloat
+  rustup target add x86_64-unknown-none
+  rustup target add loongarch64-unknown-none
   ```
 
-- **QEMU** (RISC-V 64-bit system emulator)
+- **QEMU** (install the emulators for your target architectures)
 
   ```bash
   # Ubuntu/Debian
-  sudo apt install qemu-system-misc # OR qemu-system-riscv64
+  sudo apt install qemu-system-riscv64 qemu-system-aarch64 \
+                   qemu-system-x86 qemu-system-loongarch64  # OR qemu-systrem-misc
 
   # macOS (Homebrew)
   brew install qemu
   ```
 
-- **rust-objcopy** (from `cargo-binutils`)
+- **rust-objcopy** (from `cargo-binutils`, required for non-x86_64 targets)
 
   ```bash
   cargo install cargo-binutils
@@ -37,20 +50,20 @@ A standalone Hello World application running on [ArceOS](https://github.com/arce
 ## Quick Start
 
 ```bash
-cargo install cargo-clone     # A cargo subcommand to fetch the source code of a Rust crate
-cargo clone arceos-helloworld # get source code from crates.io
-cd arceos-helloworld
-cargo run --release # run   
+# Build and run on RISC-V 64 QEMU (default)
+cargo xtask run
+
+# Build and run on other architectures
+cargo xtask run --arch aarch64
+cargo xtask run --arch x86_64
+cargo xtask run --arch loongarch64
+
+# Build only (no QEMU)
+cargo xtask build --arch riscv64
+cargo xtask build --arch aarch64
 ```
 
-This last single command will:
-
-1. Fetch all ArceOS crates from crates.io (`axstd`, `axruntime`, `axhal`, etc.)
-2. Build the kernel binary for `riscv64gc-unknown-none-elf`
-3. Convert the ELF to a raw binary via `rust-objcopy`
-4. Launch QEMU and boot the kernel
-
-Expected output:
+Expected output (riscv64 example):
 
 ```
        d8888                            .d88888b.   .d8888b.
@@ -73,37 +86,48 @@ QEMU will automatically exit after printing the message.
 ```
 app-helloworld/
 ├── .cargo/
-│   └── config.toml    # Build target & QEMU runner configuration
+│   └── config.toml       # cargo xtask alias & AX_CONFIG_PATH
+├── xtask/
+│   ├── Cargo.toml        # xtask build tool (clap CLI)
+│   └── src/
+│       └── main.rs       # build/run subcommand implementation
+├── configs/
+│   ├── riscv64.toml      # Platform config for RISC-V 64 QEMU virt
+│   ├── aarch64.toml      # Platform config for AArch64 QEMU virt
+│   ├── x86_64.toml       # Platform config for x86-64 PC
+│   └── loongarch64.toml  # Platform config for LoongArch64 QEMU virt
 ├── src/
-│   └── main.rs        # Application entry point
-├── build.rs           # Linker script path setup
-├── run_qemu.sh        # QEMU launch script (used as Cargo runner)
-├── Cargo.toml         # Dependencies (axstd from crates.io)
+│   └── main.rs           # Application entry point
+├── build.rs              # Linker script path setup (auto-detects arch)
+├── Cargo.toml            # Dependencies (axstd from crates.io)
 └── README.md
 ```
 
 ## How It Works
 
+The `cargo xtask` pattern uses a host-native helper crate (`xtask/`) to orchestrate
+cross-compilation and QEMU execution:
+
+1. **`cargo xtask build --arch <ARCH>`**
+   - Copies `configs/<ARCH>.toml` to `.axconfig.toml` (platform configuration)
+   - Runs `cargo build --release --target <TARGET>`
+   - `build.rs` auto-detects the architecture and locates the correct linker script
+
+2. **`cargo xtask run --arch <ARCH>`**
+   - Performs the build step above
+   - Converts ELF to raw binary via `rust-objcopy` (except x86_64 which uses ELF directly)
+   - Launches the appropriate QEMU emulator with architecture-specific flags
+
+## Key Components
+
 | Component | Role |
 |---|---|
 | `axstd` | ArceOS standard library (replaces Rust's `std` in `no_std` environment) |
 | `axhal` | Hardware abstraction layer, generates the linker script at build time |
-| `axplat-riscv64-qemu-virt` | RISC-V QEMU virt board platform support |
+| `axplat-*` | Platform-specific support crates (one per target board/VM) |
 | `axruntime` | Kernel initialization and runtime setup |
 | `build.rs` | Locates the linker script generated by `axhal` and passes it to the linker |
-| `run_qemu.sh` | Converts ELF to raw binary and launches QEMU |
-| `.cargo/config.toml` | Sets the build target to `riscv64gc-unknown-none-elf` and registers the QEMU runner |
-
-## Configuration
-
-The QEMU virtual machine is configured with:
-
-- **Memory**: 128 MB
-- **CPUs**: 1
-- **Machine**: `virt`
-- **BIOS**: default (OpenSBI)
-
-These settings can be adjusted in `run_qemu.sh`.
+| `configs/*.toml` | Pre-generated platform configuration for each architecture |
 
 ## License
 
