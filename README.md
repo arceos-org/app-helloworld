@@ -21,7 +21,7 @@ A standalone Hello World application running on [ArceOS](https://github.com/arce
 
   ```bash
   # Ubuntu/Debian
-  sudo apt install qemu-system-riscv64
+  sudo apt install qemu-system-misc # OR qemu-system-riscv64
 
   # macOS (Homebrew)
   brew install qemu
@@ -37,7 +37,8 @@ A standalone Hello World application running on [ArceOS](https://github.com/arce
 ## Quick Start
 
 ```bash
-cargo source arceos-helloworld # get source code from crates.io
+cargo install cargo-clone     # A cargo subcommand to fetch the source code of a Rust crate
+cargo clone arceos-helloworld # get source code from crates.io
 cd arceos-helloworld
 cargo run --release # run   
 ```
