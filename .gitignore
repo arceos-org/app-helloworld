@@ -1,6 +1,6 @@
 target
 .vscode
 .DS_Store
-Cargo.lock
+#Cargo.lock
 *.elf
 *.bin
