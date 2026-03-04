@@ -1,5 +1,5 @@
 # arceos-helloworld
-[![Crates.io](https://img.shields.io/crates/v/arceos-helloworld.svg)](https://crates.io/crates/arceos-helloworld) [![Docs.rs](https://docs.rs/arceos-helloworld/badge.svg)](https://docs.rs/arceos-helloworld) [![CI](https://github.com/arceos-org/arceos-helloworld/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/arceos-org/arceos/actions/workflows/ci.yml) [![License](https://img.shields.io/crates/l/arceos-helloworld.svg)](LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/arceos-helloworld.svg)](https://crates.io/crates/arceos-helloworld) [![CI](https://github.com/arceos-org/arceos-helloworld/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/arceos-org/arceos/actions/workflows/ci.yml) [![License](https://img.shields.io/crates/l/arceos-helloworld.svg)](LICENSE)
 
 
 A standalone Hello World application running on [ArceOS](https://github.com/arceos-org/arceos) unikernel, with all dependencies sourced from [crates.io](https://crates.io). Supports multiple architectures via `cargo xtask`.
