@@ -1,31 +1,31 @@
 name: CI
 
 on:
-  push:
-    branches: [ main, dev, master ]
-  pull_request:
-    branches: [ main, dev, master ]
+    push:
+        branches: [main, dev, master]
+    pull_request:
+        branches: [main, dev, master]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    container: docker.cnb.cool/learningos/tangram-crates
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+    test:
+        runs-on: ubuntu-latest
+        container: ghcr.io/chyyuu/tangram-crates
 
-    - name: Verify tools
-      run: |
-        echo "=== Checking Rust version ==="
-        rustc --version --verbose
-        echo ""
-        echo "=== Checking QEMU version ==="
-        qemu-system-riscv64 --version
-        qemu-system-x86_64 --version
-        qemu-system-aarch64 --version
-        qemu-system-loongarch64 --version
-        echo ""
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-    - name: Run tests
-      run: ./scripts/test.sh
+            - name: Verify tools
+              run: |
+                  echo "=== Checking Rust version ==="
+                  rustc --version --verbose
+                  echo ""
+                  echo "=== Checking QEMU version ==="
+                  qemu-system-riscv64 --version
+                  qemu-system-x86_64 --version
+                  qemu-system-aarch64 --version
+                  qemu-system-loongarch64 --version
+                  echo ""
+
+            - name: Run tests
+              run: ./scripts/test.sh
