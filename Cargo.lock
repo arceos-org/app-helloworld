@@ -63,7 +63,7 @@ dependencies = [
 
 [[package]]
 name = "arceos-helloworld"
-version = "0.4.7"
+version = "0.4.8"
 dependencies = [
  "axstd",
  "clap",
